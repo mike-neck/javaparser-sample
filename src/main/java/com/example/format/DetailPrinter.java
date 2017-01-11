@@ -24,7 +24,9 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitor;
+import org.jetbrains.annotations.Contract;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface DetailPrinter {
