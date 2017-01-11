@@ -187,7 +187,7 @@ public class DetailPrinterImpl implements DetailPrinter {
             , List<Type> args
             , Object arg) {
         if (notEmpty(args)) {
-            typeLeftParenthesis(printer).accept("");
+            typeLeftParenthesis(printer).accept(arg);
             final Iterator<Type> iter = args.iterator();
             while (iter.hasNext()) {
                 iter.next().accept(visitor, arg);
@@ -195,7 +195,7 @@ public class DetailPrinterImpl implements DetailPrinter {
                     separator(printer);
                 }
             }
-            typeRightParenthesis(printer).accept("");
+            typeRightParenthesis(printer).accept(arg);
         }
     }
 
@@ -237,7 +237,8 @@ public class DetailPrinterImpl implements DetailPrinter {
             , StringPrinter printer
             , JavadocComment javadoc
             , Object arg) {
-
+        Optional.ofNullable(javadoc)
+                .ifPresent(j -> j.accept(visitor, arg));
     }
 
     @Override
@@ -246,6 +247,7 @@ public class DetailPrinterImpl implements DetailPrinter {
             , StringPrinter printer
             , Comment comment
             , Object arg) {
-
+        Optional.ofNullable(comment)
+                .ifPresent(c -> c.accept(visitor, arg));
     }
 }
