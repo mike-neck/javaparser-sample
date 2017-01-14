@@ -24,9 +24,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitor;
-import org.jetbrains.annotations.Contract;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface DetailPrinter {
@@ -67,19 +65,43 @@ public interface DetailPrinter {
         }
     }
 
-    void printMembers(VoidVisitor<Object> visitor, StringPrinter printer, List<BodyDeclaration> members, Object arg);
+    void printMembers(VoidVisitor<Object> visitor
+            , StringPrinter printer
+            , List<BodyDeclaration> members
+            , Object arg);
 
-    void printMemberAnnotations(VoidVisitor<Object> visitor, StringPrinter printer, List<AnnotationExpr> annotations, Object arg);
+    void printMemberAnnotations(VoidVisitor<Object> visitor
+            , StringPrinter printer
+            , List<AnnotationExpr> annotations
+            , Object arg);
 
-    void printAnnotations(VoidVisitor<Object> visitor, StringPrinter printer, List<AnnotationExpr> annotations, Object arg);
+    void printAnnotations(VoidVisitor<Object> visitor
+            , StringPrinter printer
+            , List<AnnotationExpr> annotations
+            , Object arg);
 
-    void printTypeArgs(VoidVisitor<Object> visitor, StringPrinter printer, List<Type> args, Object arg);
+    void printTypeArgs(VoidVisitor<Object> visitor
+            , StringPrinter printer
+            , List<Type> args
+            , Object arg);
 
-    void printTypeParameters(VoidVisitor<Object> visitor, StringPrinter printer, List<TypeParameter> args, Object arg);
+    void printTypeParameters(VoidVisitor<Object> visitor
+            , StringPrinter printer
+            , List<TypeParameter> args
+            , Object arg);
 
-    void printArguments(VoidVisitor<Object> visitor, StringPrinter printer, List<Expression> args, Object arg);
+    void printArguments(VoidVisitor<Object> visitor
+            , StringPrinter printer
+            , List<Expression> args
+            , Object arg);
 
-    void printJavadoc(VoidVisitor<Object> visitor, StringPrinter printer, JavadocComment javadoc, Object arg);
+    void printJavadoc(VoidVisitor<Object> visitor
+            , StringPrinter printer
+            , JavadocComment javadoc
+            , Object arg);
 
-    void printJavaComment(VoidVisitor<Object> visitor, StringPrinter printer, Comment comment, Object arg);
+    void printJavaComment(VoidVisitor<Object> visitor
+            , StringPrinter printer
+            , Comment comment
+            , Object arg);
 }

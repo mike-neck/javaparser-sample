@@ -21,6 +21,7 @@
 
 package com.example.format;
 
+import com.example.format.config.FormatConfig;
 import com.github.javaparser.ast.TypeParameter;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.comments.Comment;
@@ -32,12 +33,24 @@ import com.github.javaparser.ast.visitor.VoidVisitor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static java.util.Collections.emptyList;
 
 public class DetailPrinterImpl implements DetailPrinter {
+
+    private final FormatConfig config;
+
+    public DetailPrinterImpl(FormatConfig config) {
+        this.config = config;
+    }
+
+    private static final Object MOD = new Object();
 
     @Contract(value = "null -> false; !null -> true", pure = true)
     private static boolean notNull(Object o) {
@@ -46,6 +59,30 @@ public class DetailPrinterImpl implements DetailPrinter {
 
     private static <T> boolean notEmpty(Collection<T> c) {
         return notNull(c) && c.size() > 0;
+    }
+
+    @Contract("null -> fail")
+    private static void consume(Consumer<Object> consumer) {
+        Objects.requireNonNull(consumer);
+        consumer.accept(MOD);
+    }
+
+    private static <T> void iterateOverSeparator(
+            @NotNull Iterable<T> iterable
+            , @NotNull Consumer<? super T> always
+            , @NotNull Runnable onHaveNext
+    ) {
+        Objects.requireNonNull(iterable);
+        Objects.requireNonNull(always);
+        Objects.requireNonNull(onHaveNext);
+
+        final Iterator<T> iter = iterable.iterator();
+        while (iter.hasNext()) {
+            always.accept(iter.next());
+            if (iter.hasNext()) {
+                onHaveNext.run();
+            }
+        }
     }
 
     @NotNull
@@ -88,6 +125,20 @@ public class DetailPrinterImpl implements DetailPrinter {
     private static <T> Consumer<T> typeRightParenthesis(StringPrinter printer) {
         Objects.requireNonNull(printer);
         return t -> printer.print(">");
+    }
+
+    @NotNull
+    @Contract("null -> fail")
+    private static <T> Consumer<T> leftParenthesis(StringPrinter printer) {
+        Objects.requireNonNull(printer);
+        return t -> printer.print("(");
+    }
+
+    @NotNull
+    @Contract("null -> fail")
+    private static <T> Consumer<T> rightParenthesis(StringPrinter printer) {
+        Objects.requireNonNull(printer);
+        return t -> printer.print(")");
     }
 
     @Override
@@ -136,7 +187,7 @@ public class DetailPrinterImpl implements DetailPrinter {
             , List<Type> args
             , Object arg) {
         if (notEmpty(args)) {
-            typeLeftParenthesis(printer).accept("");
+            typeLeftParenthesis(printer).accept(arg);
             final Iterator<Type> iter = args.iterator();
             while (iter.hasNext()) {
                 iter.next().accept(visitor, arg);
@@ -144,7 +195,7 @@ public class DetailPrinterImpl implements DetailPrinter {
                     separator(printer);
                 }
             }
-            typeRightParenthesis(printer).accept("");
+            typeRightParenthesis(printer).accept(arg);
         }
     }
 
@@ -154,7 +205,17 @@ public class DetailPrinterImpl implements DetailPrinter {
             , StringPrinter printer
             , List<TypeParameter> args
             , Object arg) {
-
+        if (notEmpty(args)) {
+            consume(typeLeftParenthesis(printer));
+            final Iterator<TypeParameter> iter = args.iterator();
+            while (iter.hasNext()) {
+                iter.next().accept(visitor, arg);
+                if (iter.hasNext()) {
+                    separator(printer);
+                }
+            }
+            consume(typeRightParenthesis(printer));
+        }
     }
 
     @Override
@@ -163,7 +224,11 @@ public class DetailPrinterImpl implements DetailPrinter {
             , StringPrinter printer
             , List<Expression> args
             , Object arg) {
-
+        consume(leftParenthesis(printer));
+        iterateOverSeparator(args
+                , e -> e.accept(visitor, arg)
+                , () -> separator(printer));
+        consume(rightParenthesis(printer));
     }
 
     @Override
@@ -172,7 +237,8 @@ public class DetailPrinterImpl implements DetailPrinter {
             , StringPrinter printer
             , JavadocComment javadoc
             , Object arg) {
-
+        Optional.ofNullable(javadoc)
+                .ifPresent(j -> j.accept(visitor, arg));
     }
 
     @Override
@@ -181,6 +247,7 @@ public class DetailPrinterImpl implements DetailPrinter {
             , StringPrinter printer
             , Comment comment
             , Object arg) {
-
+        Optional.ofNullable(comment)
+                .ifPresent(c -> c.accept(visitor, arg));
     }
 }
